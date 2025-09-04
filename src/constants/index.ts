@@ -15,3 +15,20 @@ export const ROUTES = {
   BATTLE: "/battle",
   PROFILE: "/profile",
 } as const;
+
+export const ALL_RELATIONS = [
+  "pareja",
+  "amigos",
+  "hermanos",
+  "aliados",
+  "enemigos",
+  "mentor y aprendiz",
+  "secuaces",
+] as const;
+
+export const COLORS = [
+  "bg-orange-400",
+  "bg-sky-400",
+  "bg-violet-400",
+  "bg-yellow-400",
+];

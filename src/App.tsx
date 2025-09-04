@@ -4,13 +4,13 @@ import Home from "./pages/Home/Home";
 import Login from "./pages/Auth/Login";
 import Signup from "./pages/Auth/Signup";
 import UserSetup from "./pages/UserSetup/UserSetup";
-
-import MobileContainer from "./components/Layout/MobileContainer";
+import GeneralLayout from "./components/Layout/GeneralLayout";
 import { ROUTES } from "./constants";
+import PracticeGame from "./pages/Practice/PracticeGame";
 
 function App() {
   return (
-    <MobileContainer>
+    <GeneralLayout>
       <Routes>
         {/* Redirección al login */}
         <Route path="/" element={<Navigate to={ROUTES.LOGIN} />} />
@@ -24,12 +24,12 @@ function App() {
 
         {/* App pages */}
         <Route path={ROUTES.HOME} element={<Home />} />
-        <Route path={ROUTES.PRACTICE} element={<Home />} />
+        <Route path={ROUTES.PRACTICE} element={<PracticeGame />} />
         <Route path={ROUTES.STORY} element={<Home />} />
         <Route path={ROUTES.BATTLE} element={<Home />} />
         <Route path={ROUTES.PROFILE} element={<Home />} />
       </Routes>
-    </MobileContainer>
+    </GeneralLayout>
   );
 }
 

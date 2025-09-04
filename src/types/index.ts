@@ -10,3 +10,10 @@ export type UserProfile = {
   favoriteMovie: string;
   avatar: string | null;
 };
+
+export type Pair = {
+  id: string;
+  mainName: string;
+  partnerName: string;
+  relation: string;
+};
