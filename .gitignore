@@ -1,24 +1,49 @@
+# ────────────────
+# Node / Vite
+# ────────────────
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor settings
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
 # Logs
-logs
-*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# ────────────────
+# Environment files
+# ────────────────
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# ────────────────
+# Firebase
+# ────────────────
+.firebase/
+.firebaserc
+firebase-debug.log
+firebase-debug.*
+.storage/
+**/firebase-service-account.json
+
+# ────────────────
+# OS / Misc
+# ────────────────
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
