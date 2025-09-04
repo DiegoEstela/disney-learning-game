@@ -21,11 +21,10 @@ function Home() {
       if (firebaseUser) {
         setUser(firebaseUser);
 
-        // 👇 Buscamos el perfil en Firestore
         const userProfile = await getUserProfile(firebaseUser.uid);
 
         if (!userProfile) {
-          navigate("/setup-user"); // redirigimos a setup si no tiene perfil
+          navigate("/setup-user");
         } else {
           setProfile(userProfile);
         }
@@ -78,33 +77,33 @@ function Home() {
           </span>
         </Link>
 
-        {/* Historia */}
-        <Link to={ROUTES.STORY} className="flex flex-col items-center group">
-          <div className="w-32 h-32 rounded-full border-4 border-primary overflow-hidden shadow-lg group-hover:scale-105 transition">
+        {/* Historia (deshabilitado) */}
+        <div className="flex flex-col items-center opacity-50 cursor-not-allowed">
+          <div className="w-32 h-32 rounded-full border-4 border-gray-400 overflow-hidden shadow-lg">
             <img
               src={storyIcon}
               alt="Historia"
               className="w-full h-full object-cover"
             />
           </div>
-          <span className="mt-2 font-semibold text-primary text-lg">
-            Historia
+          <span className="mt-2 font-semibold text-gray-500 text-lg">
+            Historia <span className="text-sm italic">(Próximamente)</span>
           </span>
-        </Link>
+        </div>
 
-        {/* Batalla */}
-        <Link to={ROUTES.BATTLE} className="flex flex-col items-center group">
-          <div className="w-32 h-32 rounded-full border-4 border-primary overflow-hidden shadow-lg group-hover:scale-105 transition">
+        {/* Batalla (deshabilitado) */}
+        <div className="flex flex-col items-center opacity-50 cursor-not-allowed">
+          <div className="w-32 h-32 rounded-full border-4 border-gray-400 overflow-hidden shadow-lg">
             <img
               src={battleIcon}
               alt="Batalla"
               className="w-full h-full object-cover"
             />
           </div>
-          <span className="mt-2 font-semibold text-primary text-lg">
-            Batalla
+          <span className="mt-2 font-semibold text-gray-500 text-lg">
+            Batalla <span className="text-sm italic">(Próximamente)</span>
           </span>
-        </Link>
+        </div>
       </div>
     </div>
   );

@@ -1,42 +1,44 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import pairs from "../../data/pairs.json";
-import DisneyPopup from "../../components/Popup/DisneyPopup";
-import BonusModal from "../../components/BonusModal/BonusModal";
+import BonusModal from "../BonusModal/BonusModal";
 
 import { getNewRound, getColor } from "../../utils/matchUtils";
 import type { Pair } from "../../types";
 import { COLORS } from "../../constants";
 
-function MatchCharactersGame() {
+type Props = {
+  onAnswer: (res: {
+    correct: boolean;
+    message: React.ReactNode;
+    autoClose?: boolean;
+  }) => void;
+};
+
+function MatchCharactersGame({ onAnswer }: Props) {
   const [roundPairs, setRoundPairs] = useState<Pair[]>([]);
   const [partners, setPartners] = useState<string[]>([]);
-  const [selectedMain, setSelectedMain] = useState<string | null>(null);
-  const [selectedPartner, setSelectedPartner] = useState<string | null>(null);
   const [matches, setMatches] = useState<Record<string, string>>({});
   const [colorMap, setColorMap] = useState<Record<string, string>>({});
   const [corrections, setCorrections] = useState<Record<string, boolean>>({});
-  const [completed, setCompleted] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupMessage, setPopupMessage] = useState<string | ReactNode>("");
+  const [selectedMain, setSelectedMain] = useState<string | null>(null);
+  const [selectedPartner, setSelectedPartner] = useState<string | null>(null);
 
-  // BONUS modal
+  const [completed, setCompleted] = useState(false);
   const [showBonus, setShowBonus] = useState(false);
   const [bonusPair, setBonusPair] = useState<Pair | null>(null);
 
-  // Inicializar ronda
   const loadNewRound = () => {
     const newRound = getNewRound(pairs);
     setRoundPairs(newRound);
     setPartners(
       newRound.map((p) => p.partnerName).sort(() => Math.random() - 0.5)
     );
-    setSelectedMain(null);
-    setSelectedPartner(null);
     setMatches({});
     setColorMap({});
     setCorrections({});
+    setSelectedMain(null);
+    setSelectedPartner(null);
     setCompleted(false);
-    setShowPopup(false);
     setShowBonus(false);
     setBonusPair(null);
   };
@@ -45,50 +47,48 @@ function MatchCharactersGame() {
     loadNewRound();
   }, []);
 
-  // Selección de personajes
   const handleSelect = (main?: string, partner?: string) => {
-    // Deselección main
     if (main && (selectedMain === main || matches[main])) {
+      // deseleccionar main
       const partnerToRemove = matches[main];
       setMatches((prev) => {
-        const newMatches = { ...prev };
-        delete newMatches[main];
-        return newMatches;
+        const copy = { ...prev };
+        delete copy[main];
+        return copy;
       });
       setColorMap((prev) => {
-        const newColors = { ...prev };
-        delete newColors[main];
-        if (partnerToRemove) delete newColors[partnerToRemove];
-        return newColors;
+        const copy = { ...prev };
+        delete copy[main];
+        if (partnerToRemove) delete copy[partnerToRemove];
+        return copy;
       });
       setSelectedMain(null);
       return;
     }
 
-    // Deselección partner
     if (
       partner &&
       (selectedPartner === partner || Object.values(matches).includes(partner))
     ) {
+      // deseleccionar partner
       const mainToRemove = Object.keys(matches).find(
         (m) => matches[m] === partner
       );
       setMatches((prev) => {
-        const newMatches = { ...prev };
-        if (mainToRemove) delete newMatches[mainToRemove];
-        return newMatches;
+        const copy = { ...prev };
+        if (mainToRemove) delete copy[mainToRemove];
+        return copy;
       });
       setColorMap((prev) => {
-        const newColors = { ...prev };
-        delete newColors[partner];
-        if (mainToRemove) delete newColors[mainToRemove];
-        return newColors;
+        const copy = { ...prev };
+        delete copy[partner];
+        if (mainToRemove) delete copy[mainToRemove];
+        return copy;
       });
       setSelectedPartner(null);
       return;
     }
 
-    // Selección normal
     if (main) {
       setSelectedMain(main);
       setColorMap((prev) => ({ ...prev, [main]: "bg-blue-400 text-white" }));
@@ -114,10 +114,10 @@ function MatchCharactersGame() {
     }
   };
 
-  // Verificar respuestas
   const handleCheckAnswers = () => {
     const newCorrections: Record<string, boolean> = {};
     const mistakes: string[] = [];
+    let allCorrect = true;
 
     roundPairs.forEach((p) => {
       if (matches[p.mainName] === p.partnerName) {
@@ -125,62 +125,59 @@ function MatchCharactersGame() {
       } else {
         newCorrections[p.mainName] = false;
         mistakes.push(`${p.mainName} → ${p.partnerName}`);
+        allCorrect = false;
       }
     });
 
     setCorrections(newCorrections);
 
-    if (mistakes.length > 0) {
-      setPopupMessage(
-        <div>
-          <p className="font-semibold mb-2">
-            Ups... estas eran las uniones correctas:
-          </p>
-          <ul className="list-disc list-inside text-left space-y-1">
-            {mistakes.map((m, i) => (
-              <li key={i} className="text-gray-800">
-                ✅ {m}
-              </li>
-            ))}
-          </ul>
-        </div>
-      );
-      setShowPopup(true);
-      setCompleted(false); // 👈 oculta botón
+    if (!allCorrect) {
+      onAnswer({
+        correct: false,
+        autoClose: false,
+        message: (
+          <div>
+            <p className="font-semibold mb-2">Algunas uniones estaban mal:</p>
+            <ul className="list-disc list-inside text-left space-y-1">
+              {mistakes.map((m, i) => (
+                <li key={i} className="text-gray-800">
+                  ✅ {m}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ),
+      });
+      setCompleted(false);
     } else {
       const randomPair =
         roundPairs[Math.floor(Math.random() * roundPairs.length)];
       setBonusPair(randomPair);
       setShowBonus(true);
-      setCompleted(false); // 👈 oculta botón
     }
   };
 
-  // Respuesta bonus
   const handleBonusAnswer = (answer: string) => {
     if (bonusPair && answer === bonusPair.relation) {
-      setPopupMessage(
-        "¡Correcto! Ganaste puntos bonus 🎉 Tus puntos se duplicaron ✨"
-      );
+      onAnswer({
+        correct: true,
+        autoClose: false,
+        message: "🎉 ¡Correcto! Ganaste puntos bonus",
+      });
     } else {
-      setPopupMessage(
-        `Ups... la relación correcta era "${bonusPair?.relation}"`
-      );
+      onAnswer({
+        correct: false,
+        autoClose: false,
+        message: `❌ Ups... la relación correcta era "${bonusPair?.relation}"`,
+      });
     }
 
     setShowBonus(false);
-    setShowPopup(true);
-
-    setTimeout(() => {
-      loadNewRound();
-      setShowPopup(false);
-    }, 2500);
+    loadNewRound();
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-4">
-      <h2 className="text-xl font-bold mb-6">Une a los personajes</h2>
-
       <div className="grid grid-cols-2 gap-8 w-full max-w-md">
         {/* Columna izquierda */}
         <div className="flex flex-col gap-4">
@@ -189,7 +186,7 @@ function MatchCharactersGame() {
               key={pair.mainName}
               type="button"
               onClick={() => handleSelect(pair.mainName, undefined)}
-              className={`py-3 px-4 rounded-xl shadow-md font-semibold transition ${getColor(
+              className={`py-3 px-4 rounded-xl shadow-md font-semibold transition text-center whitespace-nowrap truncate max-w-[140px] ${getColor(
                 pair.mainName,
                 corrections,
                 colorMap
@@ -207,7 +204,7 @@ function MatchCharactersGame() {
               key={partner}
               type="button"
               onClick={() => handleSelect(undefined, partner)}
-              className={`py-3 px-4 rounded-xl shadow-md font-semibold transition ${getColor(
+              className={`py-3 px-4 rounded-xl shadow-md font-semibold transition text-center whitespace-nowrap truncate max-w-[140px] ${getColor(
                 partner,
                 corrections,
                 colorMap
@@ -220,7 +217,7 @@ function MatchCharactersGame() {
       </div>
 
       <div className="mt-6 h-12 flex items-center justify-center">
-        {completed && !showPopup && !showBonus && (
+        {completed && !showBonus && (
           <button
             onClick={handleCheckAnswers}
             className="bg-primary text-white font-bold py-2 px-6 rounded-xl shadow-md hover:bg-blue-600"
@@ -230,17 +227,8 @@ function MatchCharactersGame() {
         )}
       </div>
 
-      {/* Modal Bonus */}
       {showBonus && bonusPair && (
         <BonusModal pair={bonusPair} onAnswer={handleBonusAnswer} />
-      )}
-
-      {/* Popup final */}
-      {showPopup && (
-        <DisneyPopup
-          message={popupMessage || ""}
-          onClose={() => loadNewRound()}
-        />
       )}
     </div>
   );

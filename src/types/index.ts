@@ -17,3 +17,10 @@ export type Pair = {
   partnerName: string;
   relation: string;
 };
+
+export type TrueFalseQuestion = {
+  id: string;
+  question: string;
+  answer: boolean;
+  movie: string;
+};
